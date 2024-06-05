@@ -65,4 +65,4 @@ class FrankDataset(Dataset):
 
         self.data['graphs'] = self.data['article_sentences'].progress_apply(lambda x: self.stog.parse_sents(x))
 
-        return self.data.explode('article_sentences')
+        return self.data.explode('graphs')
