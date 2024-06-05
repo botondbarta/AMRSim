@@ -7,7 +7,7 @@ import stanza
 import torch
 from tqdm import tqdm
 
-from data.frank_set import FrankDataset
+from frank_set import FrankDataset
 
 tqdm.pandas()
 stanza.download('en')
