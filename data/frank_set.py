@@ -1,25 +1,15 @@
 import json
 from pathlib import Path
 
-import amrlib
 import pandas as pd
-import stanza
 from torch.utils.data import Dataset
-from tqdm import tqdm
-
-tqdm.pandas()
-stanza.download('en')
 
 
 class FrankDataset(Dataset):
-    def __init__(self, root_dir, stog_model_dir=None):
+    def __init__(self, root_dir):
         self.root_dir = Path(root_dir)
 
-        self.segmenter = stanza.Pipeline(lang='en', processors='tokenize')
-        self.stog = amrlib.load_stog_model(model_dir=stog_model_dir)
-
         self.data = self._load_data()
-        self.data = self._create_graphs()
 
     def __getitem__(self, index):
         x = self.data[index]
@@ -57,12 +47,3 @@ class FrankDataset(Dataset):
                 data.append(sentence_annotation)
 
         return pd.DataFrame(data)
-
-    def _create_graphs(self):
-        self.data['article_sentences'] = self.data['article'].progress_apply(
-            lambda x: [sent.text for sent in self.segmenter(x).sentences]
-        )
-
-        self.data['graphs'] = self.data['article_sentences'].progress_apply(lambda x: self.stog.parse_sents(x))
-
-        return self.data.explode('graphs')
