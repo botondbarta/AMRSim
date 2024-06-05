@@ -56,11 +56,11 @@ def main(frank_path, stog_model_dir, output_path):
 
     with open(out_path/'fsrc.amr', 'w') as f:
         for graph in dataset['summary_graph']:
-            f.write(graph + '\n')
+            f.write(graph + '\n\n')
 
     with open(out_path/'ftgt.amr', 'w') as f:
         for graph in dataset['article_graphs']:
-            f.write(graph + '\n')
+            f.write(graph + '\n\n')
 
 
 if __name__ == '__main__':
