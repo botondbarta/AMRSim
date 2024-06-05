@@ -20,8 +20,8 @@ def sentence_tokenize(text, segmenter):
 
 
 @lru_cache(maxsize=None)
-def generate_amr_graphs_sents(sentences, stog):
-    return stog.parse_sents(sentences)
+def generate_amr_graphs_sents(sentences: tuple[str, ...], stog):
+    return stog.parse_sents(list(sentences))
 
 
 def create_amr_graphs(frank_df, stog_model_dir):
@@ -33,11 +33,11 @@ def create_amr_graphs(frank_df, stog_model_dir):
     )
 
     frank_df['summary_graph'] = frank_df['summary_sentence'].progress_apply(
-        lambda x: stog.parse_sents([x])
+        lambda x: stog.parse_sents([x])[0]
     )
 
     frank_df['article_graphs'] = frank_df['article_sentences'].progress_apply(
-        lambda x: generate_amr_graphs_sents(x, stog)
+        lambda x: generate_amr_graphs_sents(tuple(x), stog)
     )
 
     return frank_df.explode('article_graphs')
