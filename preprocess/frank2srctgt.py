@@ -37,7 +37,7 @@ def create_amr_graphs(frank_df, stog_model_dir):
     )
 
     frank_df['article_graphs'] = frank_df['article_sentences'].progress_apply(
-        lambda x: generate_amr_graphs_sents(tuple(x), stog)
+        lambda x: [generate_amr_graphs_sents((sentence,), stog) for sentence in x]
     )
 
     return frank_df.explode('article_graphs')
@@ -53,14 +53,13 @@ def main(frank_path, stog_model_dir, output_path):
     dataset = FrankDataset(frank_path)
     dataset = create_amr_graphs(dataset.data, stog_model_dir)
 
-
-    with open(out_path/'fsrc.amr', 'w') as f:
+    with open(out_path / 'fsrc.amr', 'w') as f:
         for graph in dataset['summary_graph']:
             f.write(graph + '\n\n')
 
-    with open(out_path/'ftgt.amr', 'w') as f:
+    with open(out_path / 'ftgt.amr', 'w') as f:
         for graph in dataset['article_graphs']:
-            f.write(graph + '\n\n')
+            f.write(graph[0] + '\n\n')
 
 
 if __name__ == '__main__':
