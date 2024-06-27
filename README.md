@@ -11,7 +11,9 @@ AMRSim calculates the cosine of contextualized token embeddings, making it align
 Run the following script to install the dependencies:
 
 ```
-pip install -r requirements.txt
+conda create --name my-env python=3.10.10
+
+pip install -e .
 ```
 Install [amr-utils](https://github.com/ablodge/amr-utils):
 ```
@@ -22,36 +24,49 @@ pip install ./amr-utils
 
 ## Computing AMR Similarity
 
-### Preprocess
-
-Linearize AMR graphs and calculate the relative distance of nodes from the root:
-
-```
-cd preprocess
-python amr2json.py -src <amr_file> -tgt <amr_file>
-```
-
 ### Returning Similarity with pre-trained model
 
 Download the model from [Google drive](https://drive.google.com/file/d/1klTrvv3hpIPxaCoMbRI7IJDme-Vq3UPS/view?usp=share_link) and
-unzip to the output directory (/sentence-transformers/output/).
+unzip to a directory (/path/to/model/).
 
-```
-cd sentence_transformers
-python test_amrsim.py
+Modify the modules.json in /path/to/model/ct-wiki-bert/modules.json to use the modified_sentence_transformer package from amrsim.
+
+```json
+[
+  {
+    "idx": 0,
+    "name": "0",
+    "path": "0_ExtendTransformer",
+    "type": "amrsim.modified_sentence_transformers.models.ExtendTransformer"
+  },
+  {
+    "idx": 1,
+    "name": "1",
+    "path": "1_Pooling",
+    "type": "amrsim.modified_sentence_transformers.models.Pooling"
+  }
+]
 ```
 
-### Training a Similarity model from scratch
-Following data preparation in AMR-DA (Shou et al., 2022), AMRSim utilized SPRING (Bevilacqua et al., 2021) to parse [one-million sentences](https://huggingface.co/datasets/princeton-nlp/datasets-for-simcse/tree/main) randomly sampled from English Wikipedia2 to AMR graphs. 
+```python
+from amrsim import amrsimscore_for_snt
+from amrsim.modified_sentence_transformers import ExtendSentenceTransformer
+import amrlib
 
-Generated Wiki AMR graphs were preprocessed and can be download from the [Google drive](https://drive.google.com/file/d/1VAuqLi0LsaCCbII_s2dPa9eDARicw18G/view?usp=sharing).
-For training, run:
+
+stog_model_dir = 'path/to/amrlib/data/model_parse_xfm_bart_large-v0_1_0'
+amrsim_model_path = "path/to/model/ct-wiki-bert"
+
+model = ExtendSentenceTransformer(amrsim_model_path)
+stog_model = amrlib.load_stog_model(model_dir=stog_model_dir)
+
+snt1 = "The cat is on the mat."
+snt2 = "The cat is on the carpet."
+amrsimscore_for_snt(snt1, snt2, model, stog_model)
 ```
-python train_stsb_ct_amr.py
-```
+
 
 ## Citation
-
 ```
 @inproceedings{shou-lin-2023-evaluate,
     title = "Evaluate {AMR} Graph Similarity via Self-supervised Learning",
